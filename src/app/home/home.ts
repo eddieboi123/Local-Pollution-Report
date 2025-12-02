@@ -21,6 +21,7 @@ export class Home {
   announcements$: Observable<Announcement[]>;
   searchTerm: string = '';
   selectedFilter: string = 'Latest';
+  selectedDate: string = '';
 
   // Barangay metrics
   totalReports$: Observable<number>;
@@ -143,10 +144,26 @@ export class Home {
     if (this.selectedFilter === 'Yesterday') {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
       filtered = filtered.filter(r => {
-        const reportDate = new Date(r.date);
-        return reportDate.toDateString() === yesterday.toDateString();
+        const reportDate = r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt);
+        reportDate.setHours(0, 0, 0, 0);
+        return reportDate.getTime() === yesterday.getTime();
       });
+    }
+
+    if (this.selectedFilter === 'Select Date' && this.selectedDate) {
+      const selected = new Date(this.selectedDate);
+      selected.setHours(0, 0, 0, 0);
+      filtered = filtered.filter(r => {
+        const reportDate = r.createdAt instanceof Date ? r.createdAt : new Date(r.createdAt);
+        reportDate.setHours(0, 0, 0, 0);
+        return reportDate.getTime() === selected.getTime();
+      });
+    }
+
+    if (this.selectedFilter === 'Trending') {
+      filtered = [...filtered].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0));
     }
 
     return filtered;

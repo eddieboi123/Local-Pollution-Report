@@ -4,6 +4,7 @@ export interface AppUser {
   role: 'user' | 'admin';
   createdAt: any;
   barangay: string;
+  suspended?: boolean;  // User suspension status
   settings?: {
     language: 'english' | 'filipino';
     textSize: 'small' | 'medium' | 'large';

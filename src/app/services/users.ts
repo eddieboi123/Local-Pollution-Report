@@ -1,6 +1,7 @@
 // src/app/services/users.service.ts
 import { Injectable } from '@angular/core';
 import { Firestore, collection, collectionData, doc, updateDoc, docData, query, where } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable, firstValueFrom } from 'rxjs';
 import { AppUser } from '../interfaces';
 import { AuthService } from './auth-guard';
@@ -10,7 +11,11 @@ import { AuthService } from './auth-guard';
 })
 export class UsersService {
 
-  constructor(private firestore: Firestore, private auth: AuthService) {}
+  constructor(
+    private firestore: Firestore,
+    private auth: AuthService,
+    private functions: Functions
+  ) {}
 
   /**
    * Ensure current user is authorized to act for a barangay.
@@ -53,6 +58,13 @@ export class UsersService {
     await updateDoc(userRef, { role });
   }
 
+  /** Update user role - MAIN ADMIN ONLY (no barangay restriction) */
+  async updateRoleByMainAdmin(uid: string, role: 'user' | 'admin'): Promise<void> {
+    await this.ensureAdminFor(null, true); // Require global admin
+    const userRef = doc(this.firestore, `users/${uid}`);
+    await updateDoc(userRef, { role });
+  }
+
   /** Suspend user (mark as inactive) */
   async suspendUser(uid: string): Promise<void> {
     // allow main-admin or barangay-admin for the target user's barangay
@@ -62,6 +74,32 @@ export class UsersService {
     await this.ensureAdminFor(targetBarangay);
     const userRef = doc(this.firestore, `users/${uid}`);
     await updateDoc(userRef, { suspended: true });
+  }
+
+  /** Unsuspend user (mark as active) */
+  async unsuspendUser(uid: string): Promise<void> {
+    // allow main-admin or barangay-admin for the target user's barangay
+    const targetRef = doc(this.firestore, `users/${uid}`);
+    const target = await firstValueFrom(docData(targetRef) as Observable<AppUser>);
+    const targetBarangay = (target && (target as any).barangay) || null;
+    await this.ensureAdminFor(targetBarangay);
+    const userRef = doc(this.firestore, `users/${uid}`);
+    await updateDoc(userRef, { suspended: false });
+  }
+
+  /** Delete user permanently (deletes both Firebase Auth and Firestore document) */
+  async deleteUser(uid: string): Promise<void> {
+    // Call the cloud function which handles both Auth and Firestore deletion
+    // The cloud function also validates permissions
+    const deleteUserAuth = httpsCallable(this.functions, 'deleteUserAuth');
+
+    try {
+      const result = await deleteUserAuth({ uid });
+      console.log('User deleted:', result);
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      throw new Error(error.message || 'Failed to delete user');
+    }
   }
 
   /** Update user settings */

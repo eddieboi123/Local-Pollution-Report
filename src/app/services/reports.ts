@@ -92,16 +92,19 @@ export class ReportsService {
       }
     }
 
-    // Prepare Firestore document
+    // Prepare Firestore document with correct field names matching Report interface
     const newReport: any = {
-      pollutionType: reportData.type,
-      street: reportData.location,
-      dateTaken: reportData.dateTaken || new Date().toLocaleDateString(),
-      timeTaken: reportData.timeTaken || new Date().toLocaleTimeString(),
+      type: reportData.type,
+      location: reportData.location,
+      date: reportData.dateTaken || new Date().toLocaleDateString(),
+      time: reportData.timeTaken || new Date().toLocaleTimeString(),
       description: reportData.description,
       images: imageUrls,
-      userId: user.uid,
+      reporterId: user.uid,
+      reporterName: user.email || 'Anonymous',
       barangayId: reportData.barangayId || (user?.barangay || null),
+      status: 'Pending',
+      upvotes: 0,
       createdAt: serverTimestamp()
     };
 
@@ -121,14 +124,17 @@ export class ReportsService {
   }) {
     const reportsCollection = collection(this.firestore, 'reports');
     const newReport: any = {
-      pollutionType: payload.type,
-      street: payload.location,
-      dateTaken: payload.dateTaken || new Date().toLocaleDateString(),
-      timeTaken: payload.timeTaken || new Date().toLocaleTimeString(),
+      type: payload.type,
+      location: payload.location,
+      date: payload.dateTaken || new Date().toLocaleDateString(),
+      time: payload.timeTaken || new Date().toLocaleTimeString(),
       description: payload.description,
       images: payload.imageUrls || [],
-      userId: user.uid,
+      reporterId: user.uid,
+      reporterName: user.email || 'Anonymous',
       barangayId: payload.barangayId || (user?.barangay || null),
+      status: 'Pending',
+      upvotes: 0,
       createdAt: serverTimestamp()
     };
 
@@ -144,9 +150,11 @@ export class ReportsService {
     >;
   }
 
-  /** Get reports by barangay (latest first) */
+  /** Get reports by barangay (latest first) - REQUIRES COMPOSITE INDEX */
   getReportsByBarangay(barangayId: string): Observable<(Report & { id: string })[]> {
     const reportsCollection = collection(this.firestore, 'reports');
+    // NOTE: This query requires a composite index on (barangayId, createdAt)
+    // Create it in Firebase Console by clicking the link in the error message
     const q = query(reportsCollection, where('barangayId', '==', barangayId), orderBy('createdAt', 'desc'));
     return collectionData(q, { idField: 'id' }) as Observable<(Report & { id: string })[]>;
   }
@@ -186,7 +194,7 @@ export class ReportsService {
     const reportsCollection = collection(this.firestore, 'reports');
     const q = query(
       reportsCollection,
-      where('userId', '==', userId),
+      where('reporterId', '==', userId),
       orderBy('createdAt', 'desc')
     );
 
@@ -207,8 +215,38 @@ export class ReportsService {
     await updateDoc(reportDoc, { upvotes: (currentUpvotes || 0) + 1 });
   }
 
-  /** DELETE a report (FIX FOR YOUR ERROR) */
+  /** DELETE a report (simple - no storage cleanup) */
   async deleteReport(reportId: string): Promise<void> {
+    const reportDoc = doc(this.firestore, `reports/${reportId}`);
+    await deleteDoc(reportDoc);
+  }
+
+  /** DELETE a report AND its associated Storage images */
+  async deleteReportWithImages(reportId: string, imageUrls: string[]): Promise<void> {
+    // Delete images from Storage first
+    if (imageUrls && imageUrls.length > 0) {
+      const { deleteObject, ref: storageRef } = await import('firebase/storage');
+
+      for (const url of imageUrls) {
+        try {
+          // Extract the storage path from the URL
+          // URL format: https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{path}?...
+          const urlParts = url.split('/o/');
+          if (urlParts.length > 1) {
+            const pathWithQuery = urlParts[1].split('?')[0];
+            const path = decodeURIComponent(pathWithQuery);
+            const imageRef = storageRef(this.storage, path);
+            await deleteObject(imageRef);
+            console.log('Deleted image from Storage:', path);
+          }
+        } catch (err) {
+          console.error('Failed to delete image from Storage:', url, err);
+          // Continue with other deletions even if one fails
+        }
+      }
+    }
+
+    // Delete Firestore document
     const reportDoc = doc(this.firestore, `reports/${reportId}`);
     await deleteDoc(reportDoc);
   }

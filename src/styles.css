@@ -167,50 +167,209 @@ body {
 
 /* Dark Mode Styles */
 body.dark-mode {
-    background-color: #1a1a1a;
-    color: #e0e0e0;
+    background-color: #121212;
+    color: #e8e8e8;
 }
 
 body.dark-mode .bg-white {
-    background-color: #2d2d2d !important;
+    background-color: #1e1e1e !important;
+    color: #e8e8e8 !important;
 }
 
 body.dark-mode .bg-light {
-    background-color: #333 !important;
+    background-color: #2a2a2a !important;
+    color: #e8e8e8 !important;
 }
 
 body.dark-mode .card {
-    background-color: #2d2d2d;
-    border-color: #404040;
+    background-color: #1e1e1e;
+    border-color: #333;
+    color: #e8e8e8;
+}
+
+body.dark-mode .card-body,
+body.dark-mode .card-title,
+body.dark-mode .card-text {
+    color: #e8e8e8 !important;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6 {
+    color: #f0f0f0 !important;
 }
 
 body.dark-mode .text-muted {
-    color: #aaa !important;
+    color: #b0b0b0 !important;
+}
+
+body.dark-mode .text-dark {
+    color: #e8e8e8 !important;
 }
 
 body.dark-mode .navbar-light {
-    background-color: #2d2d2d !important;
+    background-color: #1e1e1e !important;
+    border-bottom: 1px solid #333;
 }
 
 body.dark-mode .navbar-light .navbar-brand,
 body.dark-mode .navbar-light .nav-link {
-    color: #e0e0e0 !important;
+    color: #e8e8e8 !important;
+}
+
+body.dark-mode .navbar-light .nav-link:hover {
+    color: #4ade80 !important;
+}
+
+body.dark-mode .navbar-light .nav-link.active {
+    color: #4ade80 !important;
 }
 
 body.dark-mode .form-control,
 body.dark-mode .form-select {
+    background-color: #2a2a2a;
+    border-color: #444;
+    color: #e8e8e8;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
     background-color: #333;
-    border-color: #404040;
-    color: #e0e0e0;
+    border-color: #4ade80;
+    color: #e8e8e8;
+}
+
+body.dark-mode .form-control::placeholder {
+    color: #888;
+}
+
+body.dark-mode .form-label {
+    color: #e8e8e8 !important;
+}
+
+body.dark-mode .btn-success {
+    background-color: #22c55e;
+    border-color: #22c55e;
+    color: #000;
+}
+
+body.dark-mode .btn-success:hover {
+    background-color: #16a34a;
+    border-color: #16a34a;
+    color: #000;
+}
+
+body.dark-mode .btn-outline-secondary {
+    color: #e8e8e8;
+    border-color: #555;
+}
+
+body.dark-mode .btn-outline-secondary:hover {
+    background-color: #444;
+    border-color: #666;
+    color: #fff;
 }
 
 body.dark-mode .table {
-    color: #e0e0e0;
+    color: #e8e8e8;
 }
 
 body.dark-mode .table-light {
-    background-color: #333;
-    color: #e0e0e0;
+    background-color: #2a2a2a;
+    color: #e8e8e8;
+}
+
+body.dark-mode .table thead th {
+    background-color: #2a2a2a;
+    color: #e8e8e8;
+    border-color: #444;
+}
+
+body.dark-mode .table td,
+body.dark-mode .table th {
+    border-color: #444;
+    color: #e8e8e8;
+}
+
+body.dark-mode .badge {
+    color: #000;
+}
+
+body.dark-mode .alert {
+    border-width: 1px;
+}
+
+body.dark-mode .alert-success {
+    background-color: #1e4d2b;
+    color: #4ade80;
+    border-color: #22c55e;
+}
+
+body.dark-mode .alert-danger {
+    background-color: #4d1e1e;
+    color: #f87171;
+    border-color: #dc2626;
+}
+
+body.dark-mode .alert-warning {
+    background-color: #4d3d1e;
+    color: #fbbf24;
+    border-color: #f59e0b;
+}
+
+body.dark-mode .alert-info {
+    background-color: #1e3a4d;
+    color: #60a5fa;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .dropdown-menu {
+    background-color: #1e1e1e;
+    border-color: #444;
+}
+
+body.dark-mode .dropdown-item {
+    color: #e8e8e8;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background-color: #2a2a2a;
+    color: #fff;
+}
+
+body.dark-mode .dropdown-divider {
+    border-color: #444;
+}
+
+body.dark-mode .modal-content {
+    background-color: #1e1e1e;
+    color: #e8e8e8;
+}
+
+body.dark-mode .modal-header,
+body.dark-mode .modal-footer {
+    border-color: #444;
+}
+
+body.dark-mode .list-group-item {
+    background-color: #1e1e1e;
+    border-color: #444;
+    color: #e8e8e8;
+}
+
+body.dark-mode a {
+    color: #60a5fa;
+}
+
+body.dark-mode a:hover {
+    color: #93c5fd;
+}
+
+body.dark-mode .shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.5) !important;
 }
 
 /* Text Size Classes */

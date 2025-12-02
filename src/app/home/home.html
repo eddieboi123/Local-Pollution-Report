@@ -66,6 +66,10 @@
                 <button class="btn btn-outline-success" [class.active]="selectedFilter==='Select Date'" (click)="selectedFilter='Select Date'">Select Date</button>
                 <button class="btn btn-outline-success" [class.active]="selectedFilter==='Trending'" (click)="selectedFilter='Trending'">Trending</button>
               </div>
+              <!-- Date Picker (shown when Select Date is active) -->
+              <div *ngIf="selectedFilter==='Select Date'" class="mt-2">
+                <input type="date" class="form-control" [(ngModel)]="selectedDate" placeholder="Select date to filter">
+              </div>
             </div>
 
           </div>

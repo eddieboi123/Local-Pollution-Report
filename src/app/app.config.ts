@@ -1,4 +1,4 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 
@@ -6,6 +6,16 @@ import { initializeApp, provideFirebaseApp, getApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
+import { SettingsService } from './services/settings';
+
+// Initialize settings service on app startup
+export function initializeSettings(settingsService: SettingsService) {
+  return () => {
+    // Service constructor will handle initialization
+    return Promise.resolve();
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -33,5 +43,16 @@ export const appConfig: ApplicationConfig = {
 
     // ✅ Firebase Storage (attach the app)
     provideStorage(() => getStorage(getApp())),
+
+    // Firebase Functions
+    provideFunctions(() => getFunctions()),
+
+    // Initialize SettingsService on app startup
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeSettings,
+      deps: [SettingsService],
+      multi: true
+    }
   ]
 };

@@ -56,7 +56,16 @@ export class AuthService {
   }
 
   async login(email: string, password: string): Promise<void> {
-    await signInWithEmailAndPassword(this.auth, email, password);
+    const credential = await signInWithEmailAndPassword(this.auth, email, password);
+
+    // Check if user is suspended
+    const userDoc = doc(this.firestore, `users/${credential.user.uid}`);
+    const userData = await docData(userDoc).pipe(take(1)).toPromise() as AppUser & { suspended?: boolean };
+
+    if (userData?.suspended === true) {
+      await signOut(this.auth); // Immediately sign out
+      throw new Error('Your account has been suspended. Please contact the administrator.');
+    }
   }
 
   async logout(): Promise<void> {

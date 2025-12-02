@@ -389,17 +389,25 @@ export class SubmitReport {
       const uploadSingle = (file: File, idx: number) => {
         return new Promise<string>((resolve, reject) => {
           try {
-            const dest = storageRef(storage, `reports/${user.uid}/${Date.now()}_${file.name}`);
+            const path = `reports/${user.uid}/${Date.now()}_${file.name}`;
+            console.log(`🔥 Starting upload ${idx + 1}/${totalFiles}:`, path, 'Size:', file.size, 'bytes');
+            const dest = storageRef(storage, path);
             const task = uploadBytesResumable(dest, file as Blob);
+            console.log(`✅ Upload task created for file ${idx + 1}`);
             task.on('state_changed', (snapshot) => {
               const percent = Math.round((snapshot.bytesTransferred / (snapshot.totalBytes || 1)) * 100);
+              console.log(`📊 File ${idx + 1} progress:`, percent, '%', `(${snapshot.bytesTransferred}/${snapshot.totalBytes})`);
               this.progressPerImage[idx] = percent;
               // compute overall percent as average
               const sum = this.progressPerImage.reduce((s, p) => s + p, 0);
               this.overallPercent = Math.round(sum / totalFiles);
-            }, (err) => reject(err), async () => {
+            }, (err) => {
+              console.error(`❌ Upload error for file ${idx + 1}:`, err);
+              reject(err);
+            }, async () => {
               try {
                 const url = await getDownloadURL(dest as any);
+                console.log(`✅ File ${idx + 1} uploaded successfully! URL:`, url);
                 // mark this file as complete
                 this.progressPerImage[idx] = 100;
                 const sum = this.progressPerImage.reduce((s, p) => s + p, 0);

@@ -471,11 +471,26 @@
                   <tr *ngFor="let u of usersByBarangay[barangayName]">
                     <td>{{ u.email || 'Unknown' }}</td>
                     <td>{{ u.email }}</td>
-                    <td><span class="badge" [class.bg-success]="u.role==='admin'">{{ u.role }}</span></td>
+                    <td>
+                      <span class="badge"
+                        [class.bg-success]="u.role==='admin'"
+                        [class.bg-primary]="u.role==='user'">
+                        {{ u.role | titlecase }}
+                      </span>
+                    </td>
                     <td>{{ u.createdAt | date:'mediumDate' }}</td>
                     <td>
-                      <button class="btn btn-sm btn-outline-primary me-1" (click)="changeUserRole(u, u.role === 'admin' ? 'user' : 'admin')">Toggle Role</button>
-                      <button class="btn btn-sm btn-outline-danger" (click)="suspendUserAction(u)">Suspend</button>
+                      <button *ngIf="isMainAdmin" class="btn btn-sm btn-outline-primary me-1" (click)="changeUserRole(u, u.role === 'admin' ? 'user' : 'admin')" title="Toggle between admin and user role">Toggle Role</button>
+                      <button class="btn btn-sm me-1"
+                        [class.btn-outline-warning]="u.suspended"
+                        [class.btn-outline-danger]="!u.suspended"
+                        (click)="toggleSuspendUser(u)"
+                        [title]="u.suspended ? 'Unsuspend this user' : 'Suspend this user'">
+                        {{ u.suspended ? 'Unsuspend' : 'Suspend' }}
+                      </button>
+                      <button class="btn btn-sm btn-danger" (click)="deleteUserAction(u)" title="Permanently delete this user">
+                        <i class="fas fa-trash"></i>
+                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -503,11 +518,25 @@
                   <td>{{ u.email || 'Unknown' }}</td>
                   <td>{{ u.email }}</td>
                   <td>{{ getBarangayName(u.barangay) }}</td>
-                  <td><span class="badge" [class.bg-success]="u.role==='admin'">{{ u.role }}</span></td>
+                  <td>
+                    <span class="badge"
+                      [class.bg-success]="u.role==='admin'"
+                      [class.bg-primary]="u.role==='user'">
+                      {{ u.role | titlecase }}
+                    </span>
+                  </td>
                   <td>{{ u.createdAt | date:'mediumDate' }}</td>
                   <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" (click)="changeUserRole(u, u.role === 'admin' ? 'user' : 'admin')">Toggle Role</button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="suspendUserAction(u)">Suspend</button>
+                    <button class="btn btn-sm me-1"
+                      [class.btn-outline-warning]="u.suspended"
+                      [class.btn-outline-danger]="!u.suspended"
+                      (click)="toggleSuspendUser(u)"
+                      [title]="u.suspended ? 'Unsuspend this user' : 'Suspend this user'">
+                      {{ u.suspended ? 'Unsuspend' : 'Suspend' }}
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="deleteUserAction(u)" title="Permanently delete this user">
+                      <i class="fas fa-trash"></i>
+                    </button>
                   </td>
                 </tr>
               </tbody>

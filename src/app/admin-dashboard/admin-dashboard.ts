@@ -128,9 +128,15 @@ export class AdminDashboard implements OnInit {
 
   async updateStatus(report: Report & { id?: string }, status: 'Pending' | 'In Progress' | 'Done') {
     if (!report.id) return;
-    await this.reportsService.updateReport(report.id, { status });
-    const idx = this.reports.findIndex(r => r.id === report.id);
-    if (idx >= 0) this.reports[idx].status = status;
+    try {
+      await this.reportsService.updateReport(report.id, { status });
+      const idx = this.reports.findIndex(r => r.id === report.id);
+      if (idx >= 0) this.reports[idx].status = status;
+      this.showToast(`Report status updated to ${status}`, 'success');
+    } catch (err) {
+      console.error('Failed to update status', err);
+      this.showToast('Failed to update status', 'danger');
+    }
   }
 
   async sendResponse(report: Report & { id?: string }, text: string) {
@@ -144,8 +150,17 @@ export class AdminDashboard implements OnInit {
 
   async deleteReport(report: Report & { id?: string }) {
     if (!report.id) return;
-    await this.reportsService.deleteReport(report.id); // implement in ReportsService
-    this.reports = this.reports.filter(r => r.id !== report.id);
+    const confirmed = await this.showConfirm('Are you sure you want to delete this report? This will also delete all associated images.');
+    if (!confirmed) return;
+
+    try {
+      await this.reportsService.deleteReportWithImages(report.id, report.images || []);
+      this.reports = this.reports.filter(r => r.id !== report.id);
+      this.showToast('Report and images deleted successfully', 'success');
+    } catch (err) {
+      console.error('Failed to delete report', err);
+      this.showToast('Failed to delete report: ' + ((err as any)?.message || ''), 'danger');
+    }
   }
 
   // --- Announcements ---
@@ -315,28 +330,104 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  /** Change a user's role (admin/user) */
+  /** Change a user's role (admin/user) - MAIN ADMIN ONLY */
   async changeUserRole(user: AppUser, role: 'user' | 'admin') {
     if (!user?.uid) return;
+
+    // Only main admin can toggle roles
+    if (!this.isMainAdmin) {
+      this.showToast('Only main admin can change user roles', 'danger');
+      return;
+    }
+
     try {
-      await this.usersService.updateRole(user.uid, role);
+      await this.usersService.updateRoleByMainAdmin(user.uid, role);
       user.role = role;
+      this.showToast(`User role updated to ${role}`, 'success');
     } catch (err) {
       console.error('Failed to update role', err);
-      alert('Failed to update role');
+      this.showToast('Failed to update role: ' + ((err as any)?.message || ''), 'danger');
     }
   }
 
-  /** Suspend a user (mark suspended true in firestore) */
-  async suspendUserAction(user: AppUser) {
+  /** Toggle suspend/unsuspend a user */
+  async toggleSuspendUser(user: AppUser) {
     if (!user?.uid) return;
+
+    const isSuspended = (user as any).suspended === true;
+    const action = isSuspended ? 'unsuspend' : 'suspend';
+
+    // Get current user to prevent self-suspension
+    const currentUser = await firstValueFrom(this.auth.user$);
+    if (currentUser?.uid === user.uid) {
+      this.showToast(`You cannot ${action} yourself`, 'danger');
+      return;
+    }
+
+    // Barangay admins can only manage users in their barangay, not other admins
+    if (!this.isMainAdmin) {
+      if (user.barangay !== currentUser?.barangay) {
+        this.showToast('You can only manage users in your barangay', 'danger');
+        return;
+      }
+      if (user.role === 'admin') {
+        this.showToast('Barangay admins cannot manage other admins', 'danger');
+        return;
+      }
+    }
+
+    const confirmed = await this.showConfirm(`Are you sure you want to ${action} ${user.email}?`);
+    if (!confirmed) return;
+
     try {
-      await this.usersService.suspendUser(user.uid);
-      // optional: mark locally to reflect change
-      (user as any).suspended = true;
+      if (isSuspended) {
+        await this.usersService.unsuspendUser(user.uid);
+        (user as any).suspended = false;
+        this.showToast('User unsuspended successfully', 'success');
+      } else {
+        await this.usersService.suspendUser(user.uid);
+        (user as any).suspended = true;
+        this.showToast('User suspended successfully', 'success');
+      }
     } catch (err) {
-      console.error('Failed to suspend user', err);
-      alert('Failed to suspend user');
+      console.error(`Failed to ${action} user`, err);
+      this.showToast(`Failed to ${action} user: ` + ((err as any)?.message || ''), 'danger');
+    }
+  }
+
+  /** Delete a user permanently */
+  async deleteUserAction(user: AppUser) {
+    if (!user?.uid) return;
+
+    // Get current user to prevent self-deletion
+    const currentUser = await firstValueFrom(this.auth.user$);
+    if (currentUser?.uid === user.uid) {
+      this.showToast('You cannot delete yourself', 'danger');
+      return;
+    }
+
+    // Barangay admins can only delete users in their barangay, not other admins
+    if (!this.isMainAdmin) {
+      if (user.barangay !== currentUser?.barangay) {
+        this.showToast('You can only delete users in your barangay', 'danger');
+        return;
+      }
+      if (user.role === 'admin') {
+        this.showToast('Barangay admins cannot delete other admins', 'danger');
+        return;
+      }
+    }
+
+    const confirmed = await this.showConfirm(`⚠️ PERMANENTLY DELETE ${user.email}? This action cannot be undone!`);
+    if (!confirmed) return;
+
+    try {
+      await this.usersService.deleteUser(user.uid);
+      this.users = this.users.filter(u => u.uid !== user.uid);
+      this.showToast('User deleted successfully', 'success');
+    } catch (err) {
+      console.error('Failed to delete user', err);
+      this.showToast('Failed to delete user: ' + ((err as any)?.message || ''), 'danger');
     }
   }
 
@@ -431,9 +522,16 @@ export class AdminDashboard implements OnInit {
     const grouped: Record<string, (Report & { id?: string })[]> = {};
     const filtered = this.filteredReports();
     filtered.forEach(r => {
-      const barangay = r.barangayId || 'No Barangay';
-      if (!grouped[barangay]) grouped[barangay] = [];
-      grouped[barangay].push(r);
+      let barangayName = 'No Barangay';
+
+      if (r.barangayId) {
+        // Find the barangay name from barangays list
+        const barangay = this.barangays.find(b => b.id === r.barangayId);
+        barangayName = barangay ? barangay.name : r.barangayId;
+      }
+
+      if (!grouped[barangayName]) grouped[barangayName] = [];
+      grouped[barangayName].push(r);
     });
     return grouped;
   }

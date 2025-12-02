@@ -40,57 +40,199 @@
 
 <div class="container mt-4">
   <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow-sm">
+    <div class="col-lg-10">
+      <h2 class="mb-4">Settings</h2>
+
+      <!-- Appearance Settings Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Appearance</h5>
+        </div>
         <div class="card-body">
-          <h3 class="mb-3">Settings</h3>
           <form (ngSubmit)="saveSettings()">
-            <div class="mb-3">
-              <label class="form-label">Language</label>
-              <select class="form-select" title="Language" [(ngModel)]="settings.language" name="language">
-                <option value="english">English</option>
-                <option value="filipino">Filipino</option>
-              </select>
-            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Theme</label>
+                <select class="form-select" title="Theme" [(ngModel)]="settings.theme" name="theme" (change)="onThemeChange()">
+                  <option value="light">☀️ Light</option>
+                  <option value="dark">🌙 Dark</option>
+                </select>
+                <small class="text-muted">Change the visual theme of the app</small>
+              </div>
 
-            <div class="mb-3">
-              <label class="form-label">Text Size</label>
-              <select class="form-select" title="Text size" [(ngModel)]="settings.textSize" name="textSize">
-                <option value="small">Small</option>
-                <option value="medium">Medium</option>
-                <option value="large">Large</option>
-              </select>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Theme</label>
-              <select class="form-select" title="Theme" [(ngModel)]="settings.theme" name="theme">
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </div>
-
-            <h5 class="mt-3">Notifications</h5>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.email" name="notifyEmail" id="notifyEmail">
-              <label class="form-check-label" for="notifyEmail">Email</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.announcement" name="notifyAnnouncement" id="notifyAnnouncement">
-              <label class="form-check-label" for="notifyAnnouncement">Announcements</label>
-            </div>
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.upvote" name="notifyUpvote" id="notifyUpvote">
-              <label class="form-check-label" for="notifyUpvote">Upvotes</label>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Text Size</label>
+                <select class="form-select" title="Text size" [(ngModel)]="settings.textSize" name="textSize" (change)="onTextSizeChange()">
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </select>
+                <small class="text-muted">Adjust text size for readability</small>
+              </div>
             </div>
 
             <div class="d-flex gap-2">
-              <button class="btn btn-success" type="submit">Save Settings</button>
-              <a class="btn btn-outline-secondary" routerLink="/home">Cancel</a>
+              <button class="btn btn-success" type="submit" [disabled]="isSavingSettings">
+                <span *ngIf="isSavingSettings" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isSavingSettings ? 'Saving...' : 'Save Appearance' }}
+              </button>
             </div>
           </form>
         </div>
       </div>
+
+      <!-- Language Settings Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-language me-2"></i>Language</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="saveSettings()">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Preferred Language</label>
+              <select class="form-select" title="Language" [(ngModel)]="settings.language" name="language" (change)="onLanguageChange()">
+                <option value="english">🇺🇸 English</option>
+                <option value="filipino">🇵🇭 Filipino</option>
+              </select>
+              <small class="text-muted">Select your preferred language</small>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary" type="submit" [disabled]="isSavingSettings">
+                <span *ngIf="isSavingSettings" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isSavingSettings ? 'Saving...' : 'Save Language' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-warning">
+          <h5 class="mb-0"><i class="fas fa-key me-2"></i>Change Password</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="changePassword()">
+            <!-- Success Alert -->
+            <div *ngIf="passwordSuccess" class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="fas fa-check-circle me-2"></i>{{ passwordSuccess }}
+              <button type="button" class="btn-close" (click)="passwordSuccess = ''" aria-label="Close"></button>
+            </div>
+
+            <!-- Error Alert -->
+            <div *ngIf="passwordError" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i>{{ passwordError }}
+              <button type="button" class="btn-close" (click)="passwordError = ''" aria-label="Close"></button>
+            </div>
+
+            <div class="mb-3">
+              <label for="currentPassword" class="form-label fw-bold">Current Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="currentPassword"
+                [(ngModel)]="passwordForm.currentPassword"
+                name="currentPassword"
+                placeholder="Enter your current password"
+                [disabled]="isChangingPassword"
+                required>
+            </div>
+
+            <div class="mb-3">
+              <label for="newPassword" class="form-label fw-bold">New Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="newPassword"
+                [(ngModel)]="passwordForm.newPassword"
+                name="newPassword"
+                placeholder="Enter new password (min 6 characters)"
+                [disabled]="isChangingPassword"
+                minlength="6"
+                required>
+              <small class="text-muted">Must be at least 6 characters</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="confirmPassword" class="form-label fw-bold">Confirm New Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                [(ngModel)]="passwordForm.confirmPassword"
+                name="confirmPassword"
+                placeholder="Re-enter new password"
+                [disabled]="isChangingPassword"
+                required>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-warning" type="submit" [disabled]="isChangingPassword">
+                <span *ngIf="isChangingPassword" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isChangingPassword ? 'Updating...' : 'Update Password' }}
+              </button>
+              <button class="btn btn-outline-secondary" type="button" (click)="passwordForm = {currentPassword: '', newPassword: '', confirmPassword: ''}; passwordError = ''; passwordSuccess = ''" [disabled]="isChangingPassword">
+                Clear
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Notifications Card -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h5>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="saveSettings()">
+            <div class="mb-3">
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.email" name="notifyEmail" id="notifyEmail">
+                <label class="form-check-label fw-bold" for="notifyEmail">
+                  Email Notifications
+                </label>
+                <br>
+                <small class="text-muted ms-4">Receive updates via email</small>
+              </div>
+
+              <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.announcement" name="notifyAnnouncement" id="notifyAnnouncement">
+                <label class="form-check-label fw-bold" for="notifyAnnouncement">
+                  Announcement Notifications
+                </label>
+                <br>
+                <small class="text-muted ms-4">Get notified about new announcements</small>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="settings.notifications.upvote" name="notifyUpvote" id="notifyUpvote">
+                <label class="form-check-label fw-bold" for="notifyUpvote">
+                  Upvote Notifications
+                </label>
+                <br>
+                <small class="text-muted ms-4">Get notified when your reports receive upvotes</small>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-info text-white" type="submit" [disabled]="isSavingSettings">
+                <span *ngIf="isSavingSettings" class="spinner-border spinner-border-sm me-2"></span>
+                {{ isSavingSettings ? 'Saving...' : 'Save Notifications' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Back to Home -->
+      <div class="text-center mb-4">
+        <a class="btn btn-outline-secondary" routerLink="/home">
+          <i class="fas fa-arrow-left me-2"></i>Back to Home
+        </a>
+      </div>
+
     </div>
   </div>
 </div>
