@@ -7,7 +7,7 @@
       </button>
     </div>
 
-    <div class="row">
+    <div class="row justify-content-center">
       <!-- Toasts -->
       <div class="toast-container top-right">
         <div *ngFor="let t of toasts" class="toast show mb-2 align-items-center text-bg-{{ t.type }}" role="alert">
@@ -36,7 +36,9 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6">
+
+      <div class="col-md-8 col-lg-6">
+        <!-- Streets -->
         <div class="card mb-3">
           <div class="card-body">
             <h5>Streets</h5>
@@ -67,6 +69,7 @@
           </div>
         </div>
 
+        <!-- Pollution Types -->
         <div class="card mb-3">
           <div class="card-body">
             <h5>Pollution Types</h5>
@@ -79,58 +82,6 @@
             <div class="input-group">
               <input class="form-control" [(ngModel)]="newType" placeholder="Add new type" title="Add new pollution type">
               <button class="btn btn-primary" (click)="addType()">Add</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6">
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5>Reports</h5>
-            <div *ngIf="reports.length === 0" class="text-muted">No reports yet.</div>
-            <div *ngFor="let r of reports" class="card mb-2">
-              <div class="card-body">
-                <h6>{{ r.type | titlecase }} — {{ r.location }}</h6>
-                <p class="mb-1">{{ r.description }}</p>
-                <small class="text-muted">By {{ r.reporterName }} • {{ r.createdAt | date:'short' }}</small>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-body">
-            <h5>Users in barangay</h5>
-            <ul class="list-group">
-              <li *ngFor="let u of users" class="list-group-item">
-                <div class="row g-2 align-items-center">
-                  <div class="col-12 col-md-6">
-                    <div>{{ u.email }}</div>
-                    <small class="text-muted text-break">{{ u.uid }}</small>
-                  </div>
-                  <div class="col-12 col-md-6">
-                    <div class="d-flex flex-wrap gap-2 align-items-center justify-content-md-end">
-                      <span class="badge bg-secondary">{{ u.role }}</span>
-                      <button *ngIf="u.role !== 'admin'" class="btn btn-sm btn-outline-primary" (click)="promoteUserToAdmin(u)">Promote</button>
-                      <button *ngIf="u.role === 'admin'" class="btn btn-sm btn-outline-warning" (click)="demoteAdminToUser(u)">Demote</button>
-                      <button class="btn btn-sm btn-outline-danger" (click)="suspendUser(u)">Suspend</button>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="card mb-3">
-          <div class="card-body">
-            <h5>Post Announcement (Barangay)</h5>
-            <div class="mb-2">
-              <input class="form-control mb-2" [(ngModel)]="announcementModel.title" placeholder="Title">
-              <input class="form-control mb-2" [(ngModel)]="announcementModel.subtitle" placeholder="Subtitle (optional)">
-              <textarea class="form-control mb-2" rows="3" [(ngModel)]="announcementModel.description" placeholder="Message"></textarea>
-              <button class="btn btn-success" (click)="postBarangayAnnouncement()">Post to Barangay</button>
             </div>
           </div>
         </div>

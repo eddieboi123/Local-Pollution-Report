@@ -107,16 +107,20 @@ export class SubmitReport {
         }
 
         // load leaflet dynamically
-        this.L = await import('leaflet');
+        const leafletModule = await import('leaflet');
+        this.L = leafletModule.default || leafletModule;
         console.log('Leaflet loaded:', !!this.L);
+        console.log('Leaflet.map exists:', typeof this.L.map);
 
         // Fix marker icon - use default icon from Leaflet CDN
-        delete (this.L.Icon.Default.prototype as any)._getIconUrl;
-        this.L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-          iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-          shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
-        });
+        if (this.L.Icon && this.L.Icon.Default && this.L.Icon.Default.prototype) {
+          delete (this.L.Icon.Default.prototype as any)._getIconUrl;
+          this.L.Icon.Default.mergeOptions({
+            iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png'
+          });
+        }
 
         // create map centered on Baguio City
         this.map = this.L.map('map', {
@@ -449,7 +453,7 @@ export class SubmitReport {
       this.previews = [];
       this.progressPerImage = [];
       this.uploading = false;
-      alert('Report submitted!');
+      alert('Report submitted successfully! Your report will be reviewed and approved by an admin before it is published.');
       await this.router.navigate(['/home']);
     } catch (err) {
       console.error('Failed to submit report', err);

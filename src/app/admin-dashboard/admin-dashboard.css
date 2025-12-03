@@ -76,16 +76,25 @@
 		margin: 0 !important;
 	}
 
-	/* Force all columns to full width */
+	/* Force layout columns to full width (but not content columns) */
 	.col-md-3,
 	.col-lg-2,
 	.col-md-9,
-	.col-lg-10,
-	[class*="col-md-"],
-	[class*="col-lg-"] {
+	.col-lg-10 {
 		max-width: 100% !important;
 		flex: 0 0 100% !important;
 		padding: 0 !important;
+	}
+
+	/* Keep barangay overview cards side-by-side */
+	.card-body .row {
+		display: flex !important;
+		flex-wrap: wrap !important;
+	}
+
+	.col-6 {
+		max-width: 50% !important;
+		flex: 0 0 50% !important;
 	}
 
 	/* Main content area */

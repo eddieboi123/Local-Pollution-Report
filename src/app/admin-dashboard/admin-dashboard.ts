@@ -759,7 +759,7 @@ export class AdminDashboard implements OnInit, AfterViewInit {
       await this.reportsService.addComment(
         reportId,
         user.uid,
-        user.email || 'Admin',
+        user.username || user.email || 'Admin',
         user.role,
         commentText
       );

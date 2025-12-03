@@ -631,7 +631,7 @@
               </div>
               <div class="card-body">
                 <div class="row g-3">
-                  <div class="col-6 col-md-4">
+                  <div class="col-6 col-md-4" style="max-width: 50% !important; flex: 0 0 50% !important;">
                     <div class="card bg-light">
                       <div class="card-body text-center">
                         <h3 class="fw-bold text-primary">{{ b.streets.length || 0 }}</h3>
@@ -639,19 +639,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col-6 col-md-4">
+                  <div class="col-6 col-md-4" style="max-width: 50% !important; flex: 0 0 50% !important;">
                     <div class="card bg-light">
                       <div class="card-body text-center">
                         <h3 class="fw-bold text-success">{{ b.pollutionTypes.length || 0 }}</h3>
                         <p class="mb-0 text-muted">Pollution Types</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-12 col-md-4">
-                    <div class="card bg-light">
-                      <div class="card-body text-center">
-                        <h3 class="fw-bold text-info">{{ (b.adminIds && b.adminIds.length) || 0 }}</h3>
-                        <p class="mb-0 text-muted">Admins</p>
                       </div>
                     </div>
                   </div>
