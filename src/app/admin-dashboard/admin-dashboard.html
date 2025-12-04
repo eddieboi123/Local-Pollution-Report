@@ -808,6 +808,11 @@
   </div>
 </div>
 
+<!-- Go to Top Button -->
+<button class="go-to-top" [class.show]="showGoToTop" (click)="scrollToTop()" title="Go to top">
+  <i class="fas fa-chevron-up"></i>
+</button>
+
 <!-- Mobile Bottom Navigation (visible only on mobile) -->
 <nav class="mobile-bottom-nav d-md-none">
   <a routerLink="/home" class="mobile-nav-item" routerLinkActive="active">

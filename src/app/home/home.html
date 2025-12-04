@@ -350,6 +350,11 @@
   </div>
 </div>
 
+<!-- Go to Top Button -->
+<button class="go-to-top" [class.show]="showGoToTop()" (click)="scrollToTop()" title="Go to top">
+  <i class="fas fa-chevron-up"></i>
+</button>
+
 <!-- Image Modal -->
 <div *ngIf="selectedImage()" class="modal d-block" style="background-color: rgba(0,0,0,0.9);" (click)="closeImageModal()">
   <div class="modal-dialog modal-dialog-centered modal-xl">

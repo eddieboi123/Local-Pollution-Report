@@ -44,6 +44,9 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   // Image modal tracking
   selectedImage: string | null = null;
 
+  // Go to top button visibility
+  showGoToTop = false;
+
   announcementModel: Partial<Announcement> = {
     title: '',
     subtitle: '',
@@ -99,6 +102,8 @@ export class AdminDashboard implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // Listen to scroll events
+    window.addEventListener('scroll', this.handleScroll.bind(this));
     this.loadReports();
     this.loadAnnouncements();
     this.loadUsers();
@@ -818,5 +823,13 @@ export class AdminDashboard implements OnInit, AfterViewInit {
 
   closeImageModal(): void {
     this.selectedImage = null;
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  handleScroll() {
+    this.showGoToTop = window.scrollY > 300;
   }
 }

@@ -20,6 +20,7 @@ interface EnrichedReport extends Report {
 @Component({
   selector: 'app-home',
   templateUrl: './home.html',
+  styleUrls: ['./home.css'],
   imports: [CommonModule, FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -30,6 +31,7 @@ export class Home implements AfterViewInit {
   selectedDate = signal('');
   commentTexts = signal<{ [reportId: string]: string }>({});
   selectedImage = signal<string | null>(null);
+  showGoToTop = signal(false);
 
   // Convert observables to signals (initialized in constructor)
   user!: ReturnType<typeof toSignal<AppUser | null>>;
@@ -118,6 +120,9 @@ export class Home implements AfterViewInit {
         return this.announcementsService.getAnnouncementsForBarangay(user?.barangay || null);
       })
     );
+
+    // Listen to scroll events
+    window.addEventListener('scroll', this.handleScroll);
   }
 
   private getEnrichedReports(): Observable<EnrichedReport[]> {
@@ -383,4 +388,12 @@ export class Home implements AfterViewInit {
   closeImageModal(): void {
     this.selectedImage.set(null);
   }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  handleScroll = () => {
+    this.showGoToTop.set(window.scrollY > 300);
+  };
 }
