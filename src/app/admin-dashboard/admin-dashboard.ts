@@ -54,6 +54,9 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   // Unread notifications count
   unreadNotificationCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
   announcementModel: Partial<Announcement> = {
     title: '',
     subtitle: '',
@@ -80,6 +83,14 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
         this.notificationsService.getUnreadCount(user.uid).subscribe(count => {
           this.unreadNotificationCount = count;
         });
+      }
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
       }
     });
   }
@@ -124,6 +135,29 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   selectedTasksBarangayFilter = ''; // Submitted reports filter
   selectedAnnouncementsBarangayFilter = ''; // Announcements filter
   selectedAnalyticsBarangayFilter = ''; // Analytics filter
+
+  // Search text for each tab (main admin)
+  reportsSearchText = '';
+  tasksSearchText = '';
+  announcementsSearchText = '';
+  usersSearchText = '';
+  barangaysSearchText = '';
+  announcementTargetSearchText = ''; // For announcement target barangay selection
+  analyticsSearchText = ''; // For analytics barangay filter
+
+  // Dropdown visibility state for each filter
+  showReportsDropdown = false;
+  showTasksDropdown = false;
+  showAnnouncementsDropdown = false;
+  showUsersDropdown = false;
+  showAnnouncementTargetDropdown = false;
+  showAnalyticsDropdown = false;
+
+  // Selected announcement target barangay name for display
+  selectedAnnouncementTargetName = '';
+
+  // Filtered barangays for dropdown searches
+  filteredBarangaysForDropdown: (Barangay & { id?: string })[] = [];
 
   // Analytics chart references
   @ViewChild('analyticsBarCanvas', { static: false }) analyticsBarCanvas!: ElementRef<HTMLCanvasElement>;
@@ -335,14 +369,166 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
         // Main admin sees all barangays
         this.barangaysService.getAllBarangays().subscribe(b => {
           this.barangays = b;
+          this.filteredBarangaysForDropdown = b;
         });
       } else if (currentUser?.barangay) {
         // Barangay admin sees only their barangay
         this.barangaysService.getAllBarangays().subscribe(allBarangays => {
           this.barangays = allBarangays.filter(b => b.id === currentUser.barangay);
+          this.filteredBarangaysForDropdown = this.barangays;
         });
       }
     });
+  }
+
+  /** Filter barangays based on search text for a specific section */
+  getFilteredBarangays(searchText: string): (Barangay & { id?: string })[] {
+    if (!searchText || !searchText.trim()) {
+      return this.barangays;
+    }
+    const search = searchText.toLowerCase().trim();
+    return this.barangays.filter(b => b.name.toLowerCase().includes(search));
+  }
+
+  /** Get barangays filtered by search text for Barangays tab */
+  get filteredBarangaysList(): (Barangay & { id?: string })[] {
+    return this.getFilteredBarangays(this.barangaysSearchText);
+  }
+
+  // ========== Autocomplete Dropdown Helpers ==========
+
+  /** Select a barangay for Reports filter */
+  selectReportsBarangay(barangay: Barangay & { id?: string }) {
+    this.selectedBarangayFilter = barangay.id || '';
+    this.reportsSearchText = barangay.name;
+    this.showReportsDropdown = false;
+  }
+
+  /** Select a barangay for Tasks filter */
+  selectTasksBarangay(barangay: Barangay & { id?: string }) {
+    this.selectedTasksBarangayFilter = barangay.id || '';
+    this.tasksSearchText = barangay.name;
+    this.showTasksDropdown = false;
+  }
+
+  /** Select a barangay for Announcements filter */
+  selectAnnouncementsBarangay(barangay: Barangay & { id?: string }) {
+    this.selectedAnnouncementsBarangayFilter = barangay.id || '';
+    this.announcementsSearchText = barangay.name;
+    this.showAnnouncementsDropdown = false;
+  }
+
+  /** Select a barangay for Users filter */
+  selectUsersBarangay(barangay: Barangay & { id?: string }) {
+    this.selectedUsersBarangayFilter = barangay.id || '';
+    this.usersSearchText = barangay.name;
+    this.showUsersDropdown = false;
+  }
+
+  /** Clear Reports barangay filter */
+  clearReportsBarangayFilter() {
+    this.selectedBarangayFilter = '';
+    this.reportsSearchText = '';
+    this.showReportsDropdown = false;
+  }
+
+  /** Clear Tasks barangay filter */
+  clearTasksBarangayFilter() {
+    this.selectedTasksBarangayFilter = '';
+    this.tasksSearchText = '';
+    this.showTasksDropdown = false;
+  }
+
+  /** Clear Announcements barangay filter */
+  clearAnnouncementsBarangayFilter() {
+    this.selectedAnnouncementsBarangayFilter = '';
+    this.announcementsSearchText = '';
+    this.showAnnouncementsDropdown = false;
+  }
+
+  /** Clear Users barangay filter */
+  clearUsersBarangayFilter() {
+    this.selectedUsersBarangayFilter = '';
+    this.usersSearchText = '';
+    this.showUsersDropdown = false;
+  }
+
+  /** Select a barangay for Announcement Target */
+  selectAnnouncementTargetBarangay(barangay: Barangay & { id?: string }) {
+    this.announcementModel.barangayId = barangay.id || undefined;
+    this.announcementTargetSearchText = barangay.name;
+    this.selectedAnnouncementTargetName = barangay.name;
+    this.showAnnouncementTargetDropdown = false;
+  }
+
+  /** Clear Announcement Target barangay (set to All/Global) */
+  clearAnnouncementTargetBarangay() {
+    this.announcementModel.barangayId = undefined;
+    this.announcementTargetSearchText = '';
+    this.selectedAnnouncementTargetName = '';
+    this.showAnnouncementTargetDropdown = false;
+  }
+
+  /** Select a barangay for Analytics filter */
+  selectAnalyticsBarangay(barangay: Barangay & { id?: string }) {
+    this.selectedAnalyticsBarangayFilter = barangay.id || '';
+    this.analyticsSearchText = barangay.name;
+    this.showAnalyticsDropdown = false;
+    this.loadAnalyticsData();
+  }
+
+  /** Clear Analytics barangay filter */
+  clearAnalyticsBarangayFilter() {
+    this.selectedAnalyticsBarangayFilter = '';
+    this.analyticsSearchText = '';
+    this.showAnalyticsDropdown = false;
+    this.loadAnalyticsData();
+  }
+
+  /** Handle focus on filter input */
+  onFilterInputFocus(filter: 'reports' | 'tasks' | 'announcements' | 'users' | 'announcementTarget' | 'analytics') {
+    if (filter === 'reports') this.showReportsDropdown = true;
+    else if (filter === 'tasks') this.showTasksDropdown = true;
+    else if (filter === 'announcements') this.showAnnouncementsDropdown = true;
+    else if (filter === 'users') this.showUsersDropdown = true;
+    else if (filter === 'announcementTarget') this.showAnnouncementTargetDropdown = true;
+    else if (filter === 'analytics') this.showAnalyticsDropdown = true;
+  }
+
+  /** Handle blur on filter input */
+  onFilterInputBlur(filter: 'reports' | 'tasks' | 'announcements' | 'users' | 'announcementTarget' | 'analytics') {
+    setTimeout(() => {
+      if (filter === 'reports') this.showReportsDropdown = false;
+      else if (filter === 'tasks') this.showTasksDropdown = false;
+      else if (filter === 'announcements') this.showAnnouncementsDropdown = false;
+      else if (filter === 'users') this.showUsersDropdown = false;
+      else if (filter === 'announcementTarget') this.showAnnouncementTargetDropdown = false;
+      else if (filter === 'analytics') this.showAnalyticsDropdown = false;
+    }, 200);
+  }
+
+  /** Handle filter input change - keep dropdown open */
+  onFilterInputChange(filter: 'reports' | 'tasks' | 'announcements' | 'users' | 'announcementTarget' | 'analytics') {
+    // Clear the selection when typing (to require re-selecting from dropdown)
+    if (filter === 'reports') {
+      this.selectedBarangayFilter = '';
+      this.showReportsDropdown = true;
+    } else if (filter === 'tasks') {
+      this.selectedTasksBarangayFilter = '';
+      this.showTasksDropdown = true;
+    } else if (filter === 'announcements') {
+      this.selectedAnnouncementsBarangayFilter = '';
+      this.showAnnouncementsDropdown = true;
+    } else if (filter === 'users') {
+      this.selectedUsersBarangayFilter = '';
+      this.showUsersDropdown = true;
+    } else if (filter === 'announcementTarget') {
+      this.announcementModel.barangayId = undefined;
+      this.showAnnouncementTargetDropdown = true;
+    } else if (filter === 'analytics') {
+      this.selectedAnalyticsBarangayFilter = '';
+      this.showAnalyticsDropdown = true;
+    }
   }
 
   /** Create a new barangay */
@@ -876,12 +1062,22 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     return this.reports?.filter(r => r.approved === true && r.status === 'Done').length || 0;
   }
 
-  // Group users by barangay (for main admin display), excluding the current admin
+  // Group users by barangay (for main admin display), excluding the current admin and other main admins
   get usersByBarangay(): Record<string, AppUser[]> {
     const grouped: Record<string, AppUser[]> = {};
 
     // Filter out the current admin from the users list
-    let filteredUsers = this.users.filter(u => u.uid !== this.currentUserId);
+    // Also filter out other main admins (admins without a barangay)
+    let filteredUsers = this.users.filter(u => {
+      // Exclude current user
+      if (u.uid === this.currentUserId) return false;
+
+      // Exclude main admins (admins with no barangay) - main admins cannot see each other
+      const isMainAdmin = u.role === 'admin' && (!u.barangay || u.barangay.trim() === '');
+      if (isMainAdmin) return false;
+
+      return true;
+    });
 
     // Apply barangay filter if selected
     if (this.selectedUsersBarangayFilter) {
@@ -889,9 +1085,10 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     }
 
     filteredUsers.forEach(u => {
-      let barangayName = 'Admin';
+      let barangayName = 'Unassigned';
 
-      if (u.barangay) {
+      // Check if user has a barangay (not empty string, null, or undefined)
+      if (u.barangay && u.barangay.trim() !== '') {
         // Find the barangay name from barangays list
         const barangay = this.barangays.find(b => b.id === u.barangay);
         barangayName = barangay ? barangay.name : u.barangay;
@@ -920,9 +1117,9 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   // Get barangay names for users grouping
   get barangayKeys(): string[] {
     return Object.keys(this.usersByBarangay).sort((a, b) => {
-      // Put 'Admin' first
-      if (a === 'Admin') return -1;
-      if (b === 'Admin') return 1;
+      // Put 'Unassigned' last
+      if (a === 'Unassigned') return 1;
+      if (b === 'Unassigned') return -1;
       return a.localeCompare(b);
     });
   }
@@ -1015,6 +1212,12 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     return new Date(timestamp);
   }
 
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
   async logout() {
     try {
       await this.auth.logout();
@@ -1042,7 +1245,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
       const mapElement = document.getElementById(mapId);
       if (!mapElement) return;
 
-      const map = L.map(mapId).setView([lat, lng], 15);
+      const map = L.map(mapId).setView([lat, lng], 18);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'

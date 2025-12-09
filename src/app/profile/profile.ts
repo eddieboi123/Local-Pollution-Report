@@ -36,6 +36,9 @@ export class Profile implements OnInit {
   // Admin pending approval count
   adminPendingApprovalCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -51,6 +54,14 @@ export class Profile implements OnInit {
     this.user$.pipe(
       switchMap(user => user ? this.notificationsService.getUnreadCount(user.uid) : of(0))
     ).subscribe(count => this.unreadNotificationCount = count);
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -158,6 +169,12 @@ export class Profile implements OnInit {
       this.uploadingImage = false;
       this.notify.error('Failed to upload profile picture. Please try again.', 'Upload Failed');
     }
+  }
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
   }
 
   async logout() {

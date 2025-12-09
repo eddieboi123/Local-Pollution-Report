@@ -15,6 +15,24 @@ body {
     color: #333;
 }
 
+/* Profile Dropdown - Ensure it's fully visible */
+.profile-dropdown {
+    position: relative;
+}
+
+.profile-dropdown .dropdown-menu {
+    position: absolute;
+    right: 0;
+    left: auto;
+    min-width: 200px;
+    margin-top: 0.5rem;
+    z-index: 1050;
+}
+
+.profile-dropdown .dropdown-menu.show {
+    display: block;
+}
+
 /* Avatar Circles */
 .avatar-circle {
     width: 48px;
@@ -146,6 +164,19 @@ body {
     z-index: 1020;
 }
 
+/* Ensure navbar allows dropdown overflow */
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-collapse {
+    overflow: visible !important;
+}
+
+.navbar-nav {
+    overflow: visible !important;
+}
+
 /* Responsive Images */
 .card-img-top {
     object-fit: cover;
@@ -197,6 +228,37 @@ body.dark-mode .card-text {
     color: #e8e8e8 !important;
 }
 
+/* Announcement card exception - keep light background with dark text in dark mode */
+body.dark-mode .announcement-card,
+body.dark-mode .announcement-card.card {
+    background-color: #ffffff !important;
+    border-color: #10b981 !important;
+}
+
+body.dark-mode .announcement-card .card-body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+body.dark-mode .announcement-card .card-title,
+body.dark-mode .announcement-card .card-text,
+body.dark-mode .announcement-card h5,
+body.dark-mode .announcement-card h6,
+body.dark-mode .announcement-card p,
+body.dark-mode .announcement-card span {
+    color: #000000 !important;
+}
+
+body.dark-mode .announcement-card .text-muted,
+body.dark-mode .announcement-card .text-muted * {
+    color: #555555 !important;
+}
+
+body.dark-mode .announcement-card .text-warning,
+body.dark-mode .announcement-card .fa-star {
+    color: #f59e0b !important;
+}
+
 body.dark-mode h1,
 body.dark-mode h2,
 body.dark-mode h3,
@@ -204,6 +266,12 @@ body.dark-mode h4,
 body.dark-mode h5,
 body.dark-mode h6 {
     color: #f0f0f0 !important;
+}
+
+/* Exclude announcement card headings from dark mode */
+body.dark-mode .announcement-card h5,
+body.dark-mode .announcement-card h6 {
+    color: #000000 !important;
 }
 
 body.dark-mode .text-muted {
@@ -341,11 +409,11 @@ body.dark-mode .dropdown-menu {
 }
 
 body.dark-mode .dropdown-item {
-    color: #e8e8e8;
+    color: #ffffff;
 }
 
 body.dark-mode .dropdown-item:hover {
-    background-color: #2a2a2a;
+    background-color: #198754;
     color: #fff;
 }
 

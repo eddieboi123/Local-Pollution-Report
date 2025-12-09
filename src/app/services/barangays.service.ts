@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, collectionData, addDoc, doc, docData, updateDoc, query, where, deleteDoc } from '@angular/fire/firestore';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Firestore, collection, collectionData, addDoc, doc, docData, updateDoc, query, where, deleteDoc, orderBy } from '@angular/fire/firestore';
+import { Observable, firstValueFrom, map } from 'rxjs';
 import { arrayUnion, arrayRemove, serverTimestamp } from 'firebase/firestore';
 import { AuthService } from './auth-guard';
 
@@ -73,10 +73,12 @@ export class BarangaysService {
     await deleteDoc(d);
   }
 
-  /** Get all barangays */
+  /** Get all barangays sorted by name (ascending) */
   getAllBarangays(): Observable<(Barangay & { id?: string })[]> {
     const col = collection(this.firestore, 'barangays');
-    return collectionData(col, { idField: 'id' }) as Observable<(Barangay & { id?: string })[]>;
+    return (collectionData(col, { idField: 'id' }) as Observable<(Barangay & { id?: string })[]>).pipe(
+      map(barangays => barangays.sort((a, b) => a.name.localeCompare(b.name)))
+    );
   }
 
   /** Get barangay by id */

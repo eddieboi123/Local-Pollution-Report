@@ -46,3 +46,11 @@ Thumbs.db
 .firebase
 *-debug.log
 .runtimeconfig.json
+
+# Service Account Keys (NEVER commit these!)
+serviceAccountKey.json
+**/serviceAccountKey.json
+
+# Scripts dist
+/scripts/dist
+/scripts/node_modules

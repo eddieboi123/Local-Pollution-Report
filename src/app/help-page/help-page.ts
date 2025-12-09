@@ -27,6 +27,9 @@ export class HelpPage implements OnInit {
   // Admin pending approval count
   adminPendingApprovalCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
   constructor(
     private auth: AuthService,
     private router: Router,
@@ -50,6 +53,14 @@ export class HelpPage implements OnInit {
         );
       })
     ).subscribe(count => this.adminPendingApprovalCount = count);
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -94,6 +105,12 @@ export class HelpPage implements OnInit {
         );
       })
     );
+  }
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
   }
 
   async logout(): Promise<void> {

@@ -50,8 +50,8 @@
           </a>
         </li>
 
-        <li class="nav-item dropdown ms-lg-2" *ngIf="user$ | async as user">
-          <a class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" role="button">
+        <li class="nav-item ms-lg-2 position-relative" *ngIf="user$ | async as user">
+          <button class="nav-link d-flex align-items-center profile-dropdown-btn" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="showProfileMenu" aria-haspopup="true">
             <img *ngIf="user.profilePictureUrl; else userIcon"
                  [src]="user.profilePictureUrl"
                  alt="Profile"
@@ -61,8 +61,9 @@
                 {{ (user.fullName || user.email || 'U').charAt(0).toUpperCase() }}
               </div>
             </ng-template>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
+            <i class="fas fa-caret-down ms-2"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end show profile-dropdown-menu" *ngIf="showProfileMenu">
             <li><a class="dropdown-item" routerLink="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
             <li><a class="dropdown-item" routerLink="/notifications"><i class="fas fa-bell me-2"></i>Notifications</a></li>
             <li><a class="dropdown-item" routerLink="/settings"><i class="fas fa-cog me-2"></i>Settings</a></li>

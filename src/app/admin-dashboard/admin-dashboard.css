@@ -1257,3 +1257,124 @@ body.dark-mode .report-card .card-body {
 	border: 1px solid #dee2e6;
 	background-color: #f8f9fa;
 }
+
+/* ========== Barangay Filter Autocomplete Dropdown ========== */
+.position-relative {
+	z-index: 100;
+}
+
+.barangay-filter-dropdown {
+	max-height: 280px;
+	overflow-y: auto;
+	z-index: 1060;
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(0, 0, 0, 0.15);
+	border-radius: 0.375rem;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	background-color: #fff !important;
+}
+
+/* Ensure the filter card has proper stacking context */
+.card:has(.barangay-filter-dropdown) {
+	position: relative;
+	z-index: 10;
+}
+
+.barangay-filter-dropdown .dropdown-menu-scroll {
+	max-height: 260px;
+	overflow-y: auto;
+	background-color: #fff;
+}
+
+.barangay-filter-dropdown .dropdown-item {
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+	white-space: normal;
+	word-wrap: break-word;
+	border: none;
+	background-color: #fff !important;
+	color: #212529 !important;
+	width: 100%;
+	text-align: left;
+	display: block;
+}
+
+.barangay-filter-dropdown .dropdown-item:hover,
+.barangay-filter-dropdown .dropdown-item.active {
+	background-color: #198754 !important;
+	color: #fff !important;
+}
+
+.barangay-filter-dropdown .dropdown-item.active {
+	font-weight: 600;
+}
+
+.position-relative .dropdown-menu {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+}
+
+/* Dark mode support for filter dropdown */
+body.dark-mode .barangay-filter-dropdown {
+	background-color: #1e1e1e !important;
+	border-color: #444;
+}
+
+body.dark-mode .barangay-filter-dropdown .dropdown-menu-scroll {
+	background-color: #1e1e1e !important;
+}
+
+body.dark-mode .barangay-filter-dropdown .dropdown-item,
+body.dark-mode .barangay-filter-dropdown button.dropdown-item {
+	color: #ffffff !important;
+	background-color: #1e1e1e !important;
+	opacity: 1 !important;
+}
+
+body.dark-mode .barangay-filter-dropdown .dropdown-item:hover,
+body.dark-mode .barangay-filter-dropdown .dropdown-item.active,
+body.dark-mode .barangay-filter-dropdown button.dropdown-item:hover,
+body.dark-mode .barangay-filter-dropdown button.dropdown-item.active {
+	background-color: #198754 !important;
+	color: #ffffff !important;
+}
+
+/* Dark mode - Manage Barangay button visibility */
+body.dark-mode .btn-primary {
+	background-color: #0d6efd !important;
+	border-color: #0d6efd !important;
+	color: #fff !important;
+}
+
+body.dark-mode .btn-primary:hover {
+	background-color: #0b5ed7 !important;
+	border-color: #0a58ca !important;
+}
+
+/* Dark mode - Outline buttons visibility */
+body.dark-mode .btn-outline-primary {
+	color: #6ea8fe !important;
+	border-color: #6ea8fe !important;
+}
+
+body.dark-mode .btn-outline-primary:hover {
+	background-color: #0d6efd !important;
+	border-color: #0d6efd !important;
+	color: #fff !important;
+}
+
+body.dark-mode .btn-outline-danger {
+	color: #ea868f !important;
+	border-color: #ea868f !important;
+}
+
+body.dark-mode .btn-outline-danger:hover {
+	background-color: #dc3545 !important;
+	border-color: #dc3545 !important;
+	color: #fff !important;
+}

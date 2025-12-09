@@ -23,8 +23,8 @@
         <li class="nav-item ms-lg-3" *ngIf="(user$ | async)?.role !== 'admin'">
           <a class="btn btn-success" routerLink="/submit-report"><i class="fas fa-plus me-1"></i> New Report</a>
         </li>
-        <li class="nav-item dropdown ms-lg-2" *ngIf="user$ | async as user">
-          <a class="nav-link dropdown-toggle d-flex align-items-center position-relative" data-bs-toggle="dropdown" title="User menu" aria-label="User menu">
+        <li class="nav-item dropdown ms-lg-2 profile-dropdown" *ngIf="user$ | async as user">
+          <a class="nav-link dropdown-toggle d-flex align-items-center position-relative" href="#" role="button" (click)="toggleProfileMenu($event)" [attr.aria-expanded]="showProfileMenu" title="User menu" aria-label="User menu">
             <img *ngIf="user.profilePictureUrl; else userIcon"
                  [src]="user.profilePictureUrl"
                  alt="Profile"
@@ -40,7 +40,7 @@
               <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger profile-notification-badge">{{ unreadNotificationCount > 9 ? '9+' : unreadNotificationCount }}</span>
             }
           </a>
-          <ul class="dropdown-menu dropdown-menu-end">
+          <ul class="dropdown-menu dropdown-menu-end" [class.show]="showProfileMenu">
             <li><a class="dropdown-item" routerLink="/profile"><i class="fas fa-user me-2"></i>My Profile</a></li>
             <li>
               <a class="dropdown-item d-flex justify-content-between align-items-center" routerLink="/notifications">
@@ -104,10 +104,16 @@
         <i class="fas fa-map-marker-alt text-success me-2"></i>
         Pinpoint Exact Location <span class="text-danger">*</span>
       </label>
+      <div class="d-flex gap-2 mb-2">
+        <button type="button" class="btn btn-outline-success" (click)="getMyLocation()" [disabled]="isLocating">
+          <i class="fas" [class.fa-crosshairs]="!isLocating" [class.fa-spinner]="isLocating" [class.fa-spin]="isLocating"></i>
+          {{ isLocating ? 'Locating...' : 'Get My Location' }}
+        </button>
+      </div>
       <div id="map" class="map-display"></div>
       <small class="text-muted d-block mt-2">
         <i class="fas fa-info-circle me-1"></i>
-        Click anywhere on the map or drag the marker to set the exact pollution location. The red border shows your barangay boundary.
+        Click "Get My Location" to use your current position, or click anywhere on the map / drag the marker to set the exact pollution location. The red border shows your barangay boundary.
       </small>
     </div>
 

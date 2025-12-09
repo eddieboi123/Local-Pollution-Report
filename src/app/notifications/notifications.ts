@@ -26,6 +26,9 @@ export class NotificationsComponent implements OnInit, OnDestroy {
   // Admin pending approval count
   adminPendingApprovalCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -36,6 +39,14 @@ export class NotificationsComponent implements OnInit, OnDestroy {
     private reportsService: ReportsService
   ) {
     this.user$ = this.authService.user$;
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
+      }
+    });
   }
 
   ngOnInit() {
@@ -194,6 +205,12 @@ export class NotificationsComponent implements OnInit, OnDestroy {
 
   formatTime(timestamp: any): string {
     return this.notificationsService.formatTime(timestamp);
+  }
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
   }
 
   async logout() {

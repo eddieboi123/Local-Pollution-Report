@@ -49,6 +49,12 @@ export class SubmitReport {
   // Admin pending approval count
   adminPendingApprovalCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
+  // Location loading state
+  isLocating = false;
+
   // Street coordinates for Baguio City streets (you can expand this)
   private locationCoords: Record<string, [number, number]> = {
     // Default Baguio City streets
@@ -107,6 +113,69 @@ export class SubmitReport {
         const name = typeof s === 'string' ? s : s.name;
         return { value: typeof s === 'string' ? s : JSON.stringify(s), label: name };
       }) : [])) : of([]))
+    );
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
+      }
+    });
+  }
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
+  }
+
+  /** Get user's current location using browser geolocation */
+  getMyLocation(): void {
+    if (!navigator.geolocation) {
+      this.notify.error('Geolocation is not supported by your browser', 'Location Error');
+      return;
+    }
+
+    this.isLocating = true;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        // Move marker to user's location
+        this.moveMarkerTo(lat, lng);
+
+        // Zoom to maximum level (18)
+        if (this.map) {
+          this.map.setView([lat, lng], 18);
+        }
+
+        this.isLocating = false;
+        this.notify.success('Location found! Pin placed at your current position.', 'Location Found');
+      },
+      (error) => {
+        this.isLocating = false;
+        let errorMessage = 'Unable to get your location';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'Location permission denied. Please enable location access in your browser.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'Location information is unavailable.';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'Location request timed out.';
+            break;
+        }
+        this.notify.error(errorMessage, 'Location Error');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
     );
   }
 

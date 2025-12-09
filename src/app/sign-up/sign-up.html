@@ -51,11 +51,44 @@
 
             <div class="mb-3">
               <label for="barangay" class="form-label fw-medium">Select Barangay *</label>
-              <select id="barangay" class="form-select" [(ngModel)]="selectedBarangay" name="selectedBarangay" required #barangayField="ngModel">
-                <option value="">Choose a barangay...</option>
-                <option *ngFor="let b of (barangays$ | async)" [value]="b.id">{{ b.name }}</option>
-              </select>
-              <div *ngIf="barangayField.invalid && barangayField.touched" class="text-danger small mt-1">Please select a barangay</div>
+              <div class="position-relative">
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <input
+                    type="text"
+                    id="barangay"
+                    class="form-control"
+                    [(ngModel)]="barangaySearchText"
+                    name="barangaySearch"
+                    placeholder="Type to search barangay..."
+                    (input)="filterBarangays()"
+                    (focus)="onBarangayInputFocus()"
+                    (blur)="onBarangayInputBlur()"
+                    autocomplete="off"
+                    [class.is-valid]="selectedBarangay"
+                    required>
+                  <button *ngIf="barangaySearchText" type="button" class="btn btn-outline-secondary" (click)="clearBarangaySelection()" title="Clear selection" aria-label="Clear barangay selection">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+                <input type="hidden" [(ngModel)]="selectedBarangay" name="selectedBarangay" required #barangayField="ngModel">
+                <div *ngIf="showBarangayDropdown && filteredBarangays.length > 0" class="dropdown-menu show w-100 barangay-dropdown">
+                  <div class="dropdown-menu-scroll">
+                    <button *ngFor="let b of filteredBarangays"
+                            type="button"
+                            class="dropdown-item"
+                            [class.active]="selectedBarangay === b.id"
+                            (mousedown)="selectBarangay(b)">
+                      {{ b.name }}
+                    </button>
+                  </div>
+                </div>
+                <div *ngIf="showBarangayDropdown && filteredBarangays.length === 0 && barangaySearchText" class="dropdown-menu show w-100">
+                  <span class="dropdown-item text-muted">No barangays found</span>
+                </div>
+              </div>
+              <small class="text-muted">{{ allBarangays.length }} barangays available</small>
+              <div *ngIf="!selectedBarangay && barangaySearchText && !showBarangayDropdown" class="text-danger small mt-1">Please select a barangay from the list</div>
             </div>
 
             <div class="mb-3">

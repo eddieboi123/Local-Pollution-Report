@@ -1,3 +1,17 @@
+/* Profile dropdown menu override for Angular solution */
+/* Restore original dropdown menu styles */
+.profile-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 1000;
+}
+}
+.profile-dropdown-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
 /* Notification badge styles */
 .notification-badge {
   font-size: 0.65rem;

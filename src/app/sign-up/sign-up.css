@@ -85,3 +85,40 @@
     font-size: 15px;
   }
 }
+
+/* Barangay searchable dropdown */
+.barangay-dropdown {
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.barangay-dropdown .dropdown-menu-scroll {
+  max-height: 230px;
+  overflow-y: auto;
+}
+
+.barangay-dropdown .dropdown-item {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+.barangay-dropdown .dropdown-item:hover,
+.barangay-dropdown .dropdown-item.active {
+  background-color: #198754;
+  color: white;
+}
+
+.barangay-dropdown .dropdown-item.active {
+  font-weight: 600;
+}
+
+.position-relative .dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+}

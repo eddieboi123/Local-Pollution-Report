@@ -34,6 +34,7 @@ export class Home implements AfterViewInit, OnDestroy {
   commentTexts = signal<{ [reportId: string]: string }>({});
   selectedImage = signal<string | null>(null);
   showGoToTop = signal(false);
+  showProfileMenu = signal(false);
 
   // Convert observables to signals (initialized in constructor)
   user!: ReturnType<typeof toSignal<AppUser | null>>;
@@ -166,6 +167,22 @@ export class Home implements AfterViewInit, OnDestroy {
 
     // Listen to scroll events
     window.addEventListener('scroll', this.handleScroll);
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', this.handleClickOutside);
+  }
+
+  private handleClickOutside = (event: Event) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.profile-dropdown')) {
+      this.showProfileMenu.set(false);
+    }
+  };
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu.update(v => !v);
   }
 
   private getEnrichedReports(): Observable<EnrichedReport[]> {
@@ -346,7 +363,7 @@ export class Home implements AfterViewInit, OnDestroy {
       const mapElement = document.getElementById(`map-${reportId}`);
       if (!mapElement) return;
 
-      const map = L.map(`map-${reportId}`).setView([lat, lng], 15);
+      const map = L.map(`map-${reportId}`).setView([lat, lng], 18);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
@@ -452,5 +469,6 @@ export class Home implements AfterViewInit, OnDestroy {
 
   ngOnDestroy() {
     window.removeEventListener('scroll', this.handleScroll);
+    document.removeEventListener('click', this.handleClickOutside);
   }
 }

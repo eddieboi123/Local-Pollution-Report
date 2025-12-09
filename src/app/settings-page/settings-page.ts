@@ -71,6 +71,9 @@ export class SettingsPage implements OnInit {
   // Admin pending approval count
   adminPendingApprovalCount = 0;
 
+  // Profile dropdown state
+  showProfileMenu = false;
+
   constructor(
     private authService: AuthService,
     private firebaseAuth: Auth,
@@ -86,6 +89,14 @@ export class SettingsPage implements OnInit {
     this.user$.pipe(
       switchMap(user => user ? this.notificationsService.getUnreadCount(user.uid) : of(0))
     ).subscribe(count => this.unreadNotificationCount = count);
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event: Event) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.profile-dropdown')) {
+        this.showProfileMenu = false;
+      }
+    });
 
     // Load admin pending approval count (for admin badge in navbar)
     this.user$.pipe(
@@ -338,6 +349,12 @@ export class SettingsPage implements OnInit {
 
   removeToast(toast: { message: string; type: string }) {
     this.toasts = this.toasts.filter(t => t !== toast);
+  }
+
+  toggleProfileMenu(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showProfileMenu = !this.showProfileMenu;
   }
 
   async logout() {
